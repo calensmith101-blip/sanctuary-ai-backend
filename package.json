@@ -1,0 +1,13 @@
+{
+  "name": "sanctuary-openai-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal Sanctuary backend for Vercel",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node --test tests/personal-backend.test.js",
+    "test": "node --test tests/personal-backend.test.js"
+  }
+}
