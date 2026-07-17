@@ -1,13 +1,17 @@
 {
-  "name": "sanctuary-openai-backend",
+  "name": "sanctuary-ai-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Personal Sanctuary backend for Vercel",
+  "type": "commonjs",
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "openai": "^4.89.0",
+    "stripe": "^17.7.0"
   },
   "scripts": {
-    "build": "node --test tests/personal-backend.test.js",
-    "test": "node --test tests/personal-backend.test.js"
+    "test": "node --test tests/*.test.js"
   }
 }

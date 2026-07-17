@@ -19,3 +19,9 @@ This repository contains the personal Sanctuary backend for private use. It supp
 - `GET /api/meal-plan/shopping-list`
 - `GET /api/account/export`
 - `DELETE /api/account`
+
+## Full compatibility reading
+
+`POST /api/compatibility-reading` generates a structured relationship reflection from the two signs, ages/life stage, the app's compatibility scores, relationship stage, focus areas, and optional user context.
+
+It uses `OPENAI_API_KEY` when available and returns a structured local fallback when the provider is unavailable. It does not claim that astrology is scientific or that compatibility percentages predict relationship success.

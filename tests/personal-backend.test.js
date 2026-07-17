@@ -8,6 +8,7 @@ const { createResponse } = require('../api/_lib/personal-backend');
 const healthHandler = require('../api/health');
 const guideHandler = require('../api/sanctuary-guide');
 const horoscopeHandler = require('../api/horoscope');
+const compatibilityReadingHandler = require('../api/compatibility-reading');
 const generateMealPlanHandler = require('../api/meal-plan/generate');
 const currentMealPlanHandler = require('../api/meal-plan/current');
 const replaceMealPlanHandler = require('../api/meal-plan/replace-meal');
@@ -142,7 +143,7 @@ test('horoscope validates sign and period', async () => {
 
 test('horoscope uses cached fallback when provider is unavailable', async () => {
   const store = globalThis.__personalStore;
-  store.horoscopeCache.push({ userId: 'demo-user', sign: 'taurus', period: 'daily', timeId: '2026-07-16', reading: 'Cached reading', provider: 'Test Provider', updatedAt: new Date().toISOString(), cached: true });
+  store.horoscopeCache.push({ userId: 'demo-user', sign: 'taurus', period: 'daily', timeId: new Date().toISOString().slice(0, 10), reading: 'Cached reading', provider: 'Test Provider', updatedAt: new Date().toISOString(), cached: true });
   global.fetch = async () => { throw new Error('provider unavailable'); };
   const req = makeReq({ method: 'GET', query: { sign: 'taurus', period: 'daily' } });
   const res = makeRes();
@@ -150,6 +151,67 @@ test('horoscope uses cached fallback when provider is unavailable', async () => 
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.cached, true);
   assert.equal(res.body.reading, 'Cached reading');
+});
+
+
+test('compatibility reading validates signs and returns structured report', async () => {
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            title: 'Taurus + Scorpio',
+            overview: 'A thoughtful connection.',
+            strengths: 'Loyalty and depth.',
+            communication: 'Speak directly.',
+            emotional: 'Create safety.',
+            romance: 'Keep affection intentional.',
+            trust: 'Build consistency.',
+            conflict: 'Repair after tension.',
+            longTerm: 'Align values.',
+            advice: 'Have one honest conversation.',
+            questions: ['What helps you feel heard?', 'What builds trust?', 'How do you repair?', 'What do you need?', 'What are you building?'],
+            exercises: ['Ten-minute check-in.', 'Weekly appreciation.', 'Expectation reset.'],
+            disclaimer: 'Reflective astrology insight only.'
+          })
+        }
+      }]
+    })
+  });
+
+  const req = makeReq({
+    method: 'POST',
+    body: {
+      personOne: { name: 'Alex', age: 30, sign: 'Taurus' },
+      personTwo: { name: 'Sam', age: 31, sign: 'Scorpio' },
+      relationshipStage: 'Dating',
+      focusAreas: ['Communication', 'Trust'],
+      scores: { overall: 80, communication: 80, emotional: 75, romance: 85, trust: 70, conflict: 70, friendship: 75, longterm: 78 },
+      strengths: 'Deep loyalty and intensity',
+      friction: 'Trust and stubbornness'
+    }
+  });
+  const res = makeRes();
+  await compatibilityReadingHandler(req, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.report.title, 'Taurus + Scorpio');
+  assert.equal(Array.isArray(res.body.report.questions), true);
+});
+
+test('compatibility reading rejects an invalid sign', async () => {
+  const req = makeReq({
+    method: 'POST',
+    body: {
+      personOne: { age: 30, sign: 'NotASign' },
+      personTwo: { age: 31, sign: 'Scorpio' }
+    }
+  });
+  const res = makeRes();
+  await compatibilityReadingHandler(req, res);
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.error.code, 'INVALID_REQUEST');
 });
 
 test('meal plan requires authentication', async () => {
