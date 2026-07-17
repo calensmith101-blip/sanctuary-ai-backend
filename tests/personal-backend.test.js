@@ -16,7 +16,7 @@ const shoppingListHandler = require('../api/meal-plan/shopping-list');
 const exercisePlansHandler = require('../api/exercise/plans');
 const conversationsHandler = require('../api/guide/conversations');
 const memoriesHandler = require('../api/guide/memories');
-const accountExportHandler = require('../api/account/export');
+const accountExportHandler = require('../api/account');
 const accountDeleteHandler = require('../api/account');
 
 function makeReq(overrides = {}) {
