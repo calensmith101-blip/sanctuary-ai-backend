@@ -5,7 +5,7 @@ const {
   enforceAllowedOrigin,
   getUserState,
   createId
-} = require('../_lib/personal-backend');
+} = require('../../lib/personal-backend');
 
 module.exports = async function handler(req, res = createResponse()) {
   if (!enforceAllowedOrigin(req, res)) return res;

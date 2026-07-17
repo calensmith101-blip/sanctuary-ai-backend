@@ -11,7 +11,7 @@ const {
   getUserState,
   createId,
   sanitizeUserInput
-} = require('./_lib/personal-backend');
+} = require('../lib/personal-backend');
 
 const MODE_PROMPTS = {
   reflect: `You are Sanctuary Guide, a calm self-reflection coach. Support the user with reflection, feelings, thoughts, triggers, behaviour patterns, and grounded coping steps. Be warm, direct, and concise. Ask one meaningful question at a time. Avoid medical diagnosis. Never claim to be a psychologist, doctor, or therapist.`,

@@ -1,4 +1,4 @@
-const { createResponse, buildError, authenticateUser, enforceAllowedOrigin, getUserState, createId } = require('../_lib/personal-backend');
+const { createResponse, buildError, authenticateUser, enforceAllowedOrigin, getUserState, createId } = require('../../lib/personal-backend');
 
 module.exports = async function handler(req, res = createResponse()) {
   if (!enforceAllowedOrigin(req, res)) return res;

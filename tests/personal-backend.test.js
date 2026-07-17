@@ -3,7 +3,7 @@ process.env.OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createResponse } = require('../api/_lib/personal-backend');
+const { createResponse } = require('../lib/personal-backend');
 
 const healthHandler = require('../api/health');
 const guideHandler = require('../api/sanctuary-guide');

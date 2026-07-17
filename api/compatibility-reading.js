@@ -4,7 +4,7 @@ const {
   enforceAllowedOrigin,
   optionalRateLimit,
   sanitizeUserInput
-} = require('./_lib/personal-backend');
+} = require('../lib/personal-backend');
 
 const VALID_SIGNS = new Set([
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',

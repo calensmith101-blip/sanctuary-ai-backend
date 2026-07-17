@@ -1,4 +1,4 @@
-const { createResponse, createHealthPayload, enforceAllowedOrigin } = require('./_lib/personal-backend');
+const { createResponse, createHealthPayload, enforceAllowedOrigin } = require('../lib/personal-backend');
 
 module.exports = async function handler(req, res = createResponse()) {
   if (!enforceAllowedOrigin(req, res)) return res;

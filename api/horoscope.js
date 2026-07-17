@@ -9,7 +9,7 @@ const {
   getCurrentDateId,
   getCurrentMonthId,
   getCurrentWeekId
-} = require('./_lib/personal-backend');
+} = require('../lib/personal-backend');
 
 const VALID_SIGNS = new Set(['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces']);
 const VALID_PERIODS = new Set(['daily','weekly','monthly']);

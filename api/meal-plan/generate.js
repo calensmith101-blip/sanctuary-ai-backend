@@ -7,7 +7,7 @@ const {
   getUserState,
   createId,
   getCurrentWeekId
-} = require('../_lib/personal-backend');
+} = require('../../lib/personal-backend');
 
 const RECIPE_DATA = [
   {
