@@ -138,6 +138,15 @@ module.exports = async function handler(req, res = createResponse()) {
 
     if (!openaiResponse.ok) {
       const data = await openaiResponse.json().catch(() => ({}));
+
+console.error("OPENAI GUIDE ERROR", {
+  status: openaiResponse.status,
+  type: data?.error?.type,
+  code: data?.error?.code,
+  message: data?.error?.message,
+  model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+});
+
       if (openaiResponse.status === 401) {
         return res.status(401).json(buildError('OPENAI_AUTH_FAILED', 'Sanctuary Guide is temporarily unavailable. Please try again soon.', 401));
       }
