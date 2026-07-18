@@ -45,6 +45,60 @@ function buildSystemPrompt(mode, memory = []) {
   return `${base}${memoryText}\n\nSafety: If the user describes immediate danger, self-harm, or wanting to hurt someone, stop normal coaching and return a crisis response. In Australia, include emergency 000 and Lifeline 13 11 14. Do not diagnose or prescribe medication. Do not claim to be a licensed therapist or to have contacted emergency services. Ask one meaningful question at a time. Avoid giving huge lists.`;
 }
 
+function normalizeGuideMode(mode) {
+  const raw = String(mode || 'reflect').trim();
+  const compact = raw.toLowerCase().replace(/[^a-z]/g, '');
+  const aliases = {
+    account: 'accountable',
+    accountable: 'accountable',
+    anger: 'anger',
+    anxiety: 'anxiety',
+    calm: 'calm',
+    communication: 'communication',
+    confidence: 'confidence',
+    craving: 'cravings',
+    cravings: 'cravings',
+    decision: 'decisions',
+    decisions: 'decisions',
+    decisionmaking: 'decisions',
+    grief: 'grief',
+    motivation: 'motivation',
+    parent: 'parenting',
+    parenting: 'parenting',
+    recovery: 'recovery',
+    reflect: 'reflect',
+    relationships: 'relationships',
+    selfesteem: 'selfEsteem',
+    shadow: 'reflect',
+    shadowwork: 'reflect',
+    sleep: 'sleep',
+    workstress: 'workStress'
+  };
+  return aliases[compact] || (MODE_PROMPTS[raw] ? raw : 'reflect');
+}
+
+function normalizeGuideMemory(memory) {
+  if (Array.isArray(memory)) return memory.filter(item => item && item.type && item.value);
+
+  const source = memory && typeof memory === 'object' ? memory : {};
+  const map = [
+    ['triggers', 'trigger'],
+    ['patterns', 'pattern'],
+    ['goals', 'goal'],
+    ['relationships', 'relationship'],
+    ['promises', 'promise'],
+    ['copingStrategies', 'copingStrategy']
+  ];
+  return map.reduce((items, [key, type]) => {
+    if (!Array.isArray(source[key])) return items;
+    source[key].forEach(value => {
+      const cleanValue = sanitizeUserInput(String(value || ''), 500);
+      if (cleanValue) items.push({ type, value: cleanValue });
+    });
+    return items;
+  }, []);
+}
+
 function sanitiseConversation(conversation) {
   if (!Array.isArray(conversation)) return [];
   return conversation.slice(-12).map(item => ({ role: item.role, content: sanitizeUserInput(String(item.content || ''), 2500) })).filter(item => item.role && item.content);
@@ -99,10 +153,17 @@ module.exports = async function handler(req, res = createResponse()) {
 
   try {
     const payload = req.body || {};
-    const message = sanitizeUserInput(String(payload.message || payload.input || ''), 2000);
-    const mode = String(payload.mode || payload.modeId || 'reflect').toLowerCase();
-    const conversation = sanitiseConversation(payload.conversation || payload.history || []);
-    const memory = Array.isArray(payload.memory) ? payload.memory.filter(item => item && item.type && item.value) : [];
+    const incomingConversation = payload.conversation || payload.history || payload.messages || [];
+    const latestMessage = Array.isArray(incomingConversation) && incomingConversation.length
+      ? incomingConversation[incomingConversation.length - 1]?.content
+      : '';
+    const message = sanitizeUserInput(String(payload.message || payload.input || latestMessage || ''), 2000);
+    const mode = normalizeGuideMode(payload.mode || payload.modeId || 'reflect');
+    let conversation = sanitiseConversation(incomingConversation);
+    if (message && conversation.length && conversation[conversation.length - 1].role !== 'assistant' && conversation[conversation.length - 1].content === message) {
+      conversation = conversation.slice(0, -1);
+    }
+    const memory = normalizeGuideMemory(payload.memory || payload.memorySnapshot || payload.memoryList);
 
     if (!message) {
       return res.status(400).json(buildError('INVALID_REQUEST', 'A non-empty message is required.', 400));
